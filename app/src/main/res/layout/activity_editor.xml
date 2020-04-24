@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".editor">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnsalvar"
+        android:layout_alignParentBottom="true"
+        android:text="Salvar"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/txtNota"
+        android:layout_above="@id/btnsalvar"
+        android:textAlignment="viewStart"
+        android:gravity="top|left"
+        android:hint="digite aqui"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="2dp"
+        />
+
+
+</RelativeLayout>
