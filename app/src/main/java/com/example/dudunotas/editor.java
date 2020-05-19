@@ -11,17 +11,24 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.dudunotas.Model.Nota;
+import com.example.dudunotas.Model.NotasDAO;
+
 import java.util.HashSet;
 
 public class editor extends AppCompatActivity {
-EditText txtNota;
+EditText txtNota,txtTitulo;
 Button btnsalvar;
+int idNota=0;
+Nota nota;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
         txtNota = (EditText)findViewById(R.id.txtNota);
+        txtTitulo = (EditText)findViewById(R.id.txtTituloNota);
         btnsalvar = (Button)findViewById(R.id.btnsalvar);
 
         //Habilita o botão voltar na barra de ações do app
@@ -34,45 +41,33 @@ Button btnsalvar;
             }
         });
 
-        //Recebe a intent enviada pela outra activity com a posição do item selecionado na lista.
-        //Caso seja diferente de -1, significa que o usuario esta querendo modificar uma nota ja existente.
-        //Então, ele pega o texto do item da posicão informada no array de notas e coloca na caixa de texto.
         Intent intent = getIntent();
-        final int notaId = intent.getIntExtra("notaId",-1);
-        if(notaId!=-1){
-            txtNota.setText(MainActivity.notas.get(notaId));
+        idNota = intent.getIntExtra("notaId",-1);
+        if(idNota!=-1){
+            NotasDAO notasDAO = new NotasDAO(this);
+            nota = notasDAO.obterNota(idNota);
+            txtTitulo.setText(nota.getTitulo());
+            txtNota.setText(nota.getTexto());
+        }
+        else{
+            nota = new Nota();
         }
 
     }
 
     public void salvarNota(){
-        //Recebe a intent enviada pela outra activity com a posição do item selecionado na lista.
-        Intent intent = getIntent();
-        final int notaId = intent.getIntExtra("notaId",-1);
 
         //Verifica se há texto digitado na caixa de texto
-        if(txtNota.getText().toString().length()>0){
-
-            //Verifica se o notaId(Posição do item selecionado) é diferente de -1.
-            //Caso seja diferente de -1, significa que o usuario esta querendo modificar uma nota ja existente.
-            //Caso contrário, significa que ele está criando uma nova nota.
-            if(notaId!=-1){
-                MainActivity.notas.set(notaId,txtNota.getText().toString());
-                MainActivity.arrayAdapter.notifyDataSetInvalidated();
+        if(txtNota.getText().toString().length()>0 && txtTitulo.getText().toString().length()>0){
+            NotasDAO notasDAO = new NotasDAO(editor.this);
+            nota.setTexto(txtNota.getText().toString());
+            nota.setTitulo(txtTitulo.getText().toString());
+            if(idNota!=-1){
+                notasDAO.atualizarNota(nota);
             }
             else{
-                MainActivity.notas.add(txtNota.getText().toString());
-                MainActivity.arrayAdapter.notifyDataSetInvalidated();
+                notasDAO.inserirNota(nota);
             }
-
-
-            //Carrega o SharedPreferences do app
-            SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("com.example.dudunotas", Context.MODE_PRIVATE);
-            //Cria um HashSet para salvar o arrayList de notas
-            HashSet<String> set = new HashSet<>(MainActivity.notas);
-            //Salva o HashSet no sharedPreferences
-            sharedPreferences.edit().putStringSet("notas",set).apply();
-            //Finaliza a activity
             finish();
 
         }

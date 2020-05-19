@@ -16,12 +16,23 @@
 
     <EditText
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txtTituloNota"
+        android:hint="Titulo"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="2dp"
+        android:layout_alignParentTop="true"/>
+
+
+    <EditText
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/txtNota"
+        android:layout_below="@id/txtTituloNota"
         android:layout_above="@id/btnsalvar"
         android:textAlignment="viewStart"
         android:gravity="top|left"
-        android:hint="digite aqui"
+        android:hint="Digite o texto aqui"
         android:layout_marginTop="5dp"
         android:layout_marginHorizontal="2dp"
         />

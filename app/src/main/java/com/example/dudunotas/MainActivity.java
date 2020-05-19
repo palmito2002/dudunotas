@@ -1,26 +1,26 @@
 package com.example.dudunotas;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.dudunotas.Model.AdapterNota;
+import com.example.dudunotas.Model.Nota;
+import com.example.dudunotas.Model.NotasDAO;
+
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
 
-    static ArrayList<String> notas = new ArrayList<String>();
-    static ArrayAdapter arrayAdapter;
+    static ArrayList<Nota> notas = new ArrayList<Nota>();
+    AdapterNota arrayAdapter;
     ListView lista_notas;
     Button btnAdd;
 
@@ -29,21 +29,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Carrega o sharedPreferences do app e busca as notas salvas em um HashSet.
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("com.example.dudunotas", Context.MODE_PRIVATE);
-        HashSet<String> set = (HashSet<String>) sharedPreferences.getStringSet("notas", null);
-
-        //Verifica se o hashSet não é nulo, e então, passa ele para o o arrayList.
-        if (set!=null){
-            notas = new ArrayList<String>(set);
-        }
-
-        //Criar o array_adapter, passando como parâmetro o contexto,o estilo que vai ser exibido o item da lista e també, o arrayList que será utilizado.
-        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,notas);
         lista_notas = (ListView)findViewById(R.id.listanotas);
-        //Informa o array_adapter para o listView
-        lista_notas.setAdapter(arrayAdapter);
-
+        atualizarNotas();
 
         //Método que verifica quando o usuário clica em um item da lista.
         //Este método envia uma intent para classe do editor informando a posição do item selecionado. Esta posição é a mesma do arrayList.
@@ -51,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this,editor.class);
-                intent.putExtra("notaId",position);
+                intent.putExtra("notaId",notas.get(position).getId());
                 //Inicia a activity do editor
                 startActivity(intent);
             }
@@ -70,16 +57,7 @@ public class MainActivity extends AppCompatActivity {
                         .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //Caso u usuário tenha escolhido excluir, o item será removido do arrayList, atualizado o listView e també,
-                                //serão atualizadas as sharedPreferences.
-
-                                notas.remove(position);
-                                arrayAdapter.notifyDataSetInvalidated();
-
-                                SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("com.example.dudunotas", Context.MODE_PRIVATE);
-                                HashSet<String> set = new HashSet<>(notas);
-                                sharedPreferences.edit().putStringSet("notas",set).apply();
-
+                                excluirNota(notas.get(position));
                             }
                         });
                 adb.show();
@@ -97,7 +75,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+
+    public void excluirNota(Nota nota){
+        NotasDAO notasDAO = new NotasDAO(MainActivity.this);
+        notasDAO.excluirNota(nota);
+        atualizarNotas();
+    }
+
+
+    public void atualizarNotas(){
+        NotasDAO notasDAO = new NotasDAO(MainActivity.this);
+
+        if(notasDAO.obterNotas()!=null){
+            notas = new ArrayList<Nota>(notasDAO.obterNotas());
+        }
+
+        arrayAdapter = new AdapterNota(this,notas);
+        lista_notas.setAdapter(arrayAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        atualizarNotas();
     }
 
 }
